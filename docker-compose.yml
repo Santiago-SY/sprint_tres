@@ -1,0 +1,46 @@
+services:
+  # --- SERVICIO 1: LA BASE DE DATOS ---
+  victoria-logs:
+    image: victoriametrics/victoria-logs:v0.4.1-victoria-logs
+    container_name: victoria-logs
+    command: -retentionPeriod=1y -storageDataPath=/victoria-logs-data
+    ports:
+      - "9428:9428"
+    volumes:
+      - vlogs-data:/victoria-logs-data
+    networks:
+      - logging-network
+
+  # --- SERVICIO 2: EL GENERADOR DE LOGS (TU APP) ---
+  log-generator:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: log-generator
+    depends_on:
+      - victoria-logs
+    environment:
+      - VICTORIA_URL=http://victoria-logs:9428/insert/jsonline
+    networks:
+      - logging-network
+
+  # --- SERVICIO 3: LA VISUALIZACIÓN ---
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - victoria-logs
+    networks:
+      - logging-network
+
+volumes:
+  vlogs-data:
+
+networks:
+  logging-network:
+    driver: bridge

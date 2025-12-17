@@ -1,0 +1,20 @@
+# --- Binarios y Compilados ---
+# Ignoramos el binario que compilaremos localmente, 
+# porque cada SO (Windows/Mac/Linux) necesita uno distinto.
+/app/log-gen
+*.exe
+*.dll
+
+# --- Temporales del Sistema ---
+.DS_Store
+Thumbs.db
+
+# --- Configuración de IDEs (Opcional pero recomendado) ---
+# No queremos subir tu configuración personal de VSCode
+.vscode/
+.idea/
+
+# --- Datos de VictoriaLogs ---
+# ¡CRÍTICO! Nunca subas la carpeta de datos de la base de datos a GitHub.
+# Los datos deben vivir solo en tu máquina o servidor.
+victorialogs-data/
