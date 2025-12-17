@@ -1,5 +1,4 @@
 services:
-  # --- SERVICIO 1: LA BASE DE DATOS ---
   victoria-logs:
     image: victoriametrics/victoria-logs:v0.4.1-victoria-logs
     container_name: victoria-logs
@@ -11,7 +10,6 @@ services:
     networks:
       - logging-network
 
-  # --- SERVICIO 2: EL GENERADOR DE LOGS (TU APP) ---
   log-generator:
     build:
       context: ./app
@@ -24,7 +22,6 @@ services:
     networks:
       - logging-network
 
-  # --- SERVICIO 3: LA VISUALIZACIÓN ---
   grafana:
     image: grafana/grafana:10.0.0
     container_name: grafana
