@@ -29,7 +29,7 @@ func RunPaymentService(sender *client.LogSender) {
 	currencies := []string{"USD", "EUR", "UYU"}
 	statuses := []string{"SUCCESS", "SUCCESS", "SUCCESS", "FAILED"} // 75% de probabilidad de éxito
 
-	fmt.Println("💳 Servicio de Pagos: INICIADO")
+	fmt.Println(" Servicio de Pagos: INICIADO")
 
 	for {
 		// 1. Simulación de Negocio: Crear el dato

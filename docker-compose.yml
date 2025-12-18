@@ -2,7 +2,7 @@ services:
   victoria-logs:
     image: victoriametrics/victoria-logs:v0.4.1-victoria-logs
     container_name: victoria-logs
-    command: -retentionPeriod=1y -storageDataPath=/victoria-logs-data
+    command: -retentionPeriod=7d -storageDataPath=/victoria-logs-data
     ports:
       - "9428:9428"
     volumes:

@@ -20,7 +20,7 @@ type NotifLog struct {
 
 func RunNotificationService(sender *client.LogSender) {
 	channels := []string{"EMAIL", "SMS", "PUSH"}
-	fmt.Println("📨 Notification Service: INICIADO")
+	fmt.Println(" Notification Service: INICIADO")
 
 	for {
 		logData := NotifLog{

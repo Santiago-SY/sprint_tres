@@ -20,7 +20,7 @@ type RiskLog struct {
 }
 
 func RunRiskService(sender *client.LogSender) {
-	fmt.Println("🕵️  Risk Engine: INICIADO")
+	fmt.Println("  Risk Engine: INICIADO")
 
 	for {
 		score := rand.Float64()

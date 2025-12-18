@@ -17,15 +17,15 @@ func main() {
 		victoriaURL = "http://localhost:9428/insert/jsonline"
 	}
 
-	fmt.Printf("\n🚀 INICIANDO LOG GENERATOR (7 Microservicios)\n")
-	fmt.Printf("🎯 Objetivo: %s\n", victoriaURL)
+	fmt.Printf("\n INICIANDO LOG GENERATOR (7 Microservicios)\n")
+	fmt.Printf(" Objetivo: %s\n", victoriaURL)
 
 	// --- PASO 2: ARRANCAR MOTOR ---
 	sender := client.NewLogSender(victoriaURL)
 	sender.Start()
 
 	// --- PASO 3: ARRANCAR SERVICIOS (CONCURRENCIA REAL) ---
-	fmt.Println("🚦 Despertando flota de servicios...")
+	fmt.Println(" Despertando flota de servicios...")
 
 	// EXPLICACIÓN TÉCNICA (Para tu defensa):
 	// Usamos la keyword 'go' para lanzar cada función en una Goroutine separada.
@@ -46,5 +46,5 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
 
-	fmt.Println("\n🛑 Señal de parada recibida. Apagando sistema...")
+	fmt.Println("\n Señal de parada recibida. Apagando sistema...")
 }

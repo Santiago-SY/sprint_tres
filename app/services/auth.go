@@ -24,7 +24,7 @@ func RunAuthService(sender *client.LogSender) {
 	actions := []string{"LOGIN", "LOGOUT", "REGISTER", "2FA_VERIFY"}
 	devices := []string{"iPhone 14", "Pixel 7", "Windows Chrome", "Mac Safari"}
 
-	fmt.Println("🔐 Servicio de Auth: INICIADO")
+	fmt.Println(" Servicio de Auth: INICIADO")
 
 	for {
 		logData := AuthLog{

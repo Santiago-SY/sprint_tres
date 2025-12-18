@@ -20,7 +20,7 @@ type ProductLog struct {
 
 func RunProductService(sender *client.LogSender) {
 	categories := []string{"Electronics", "Clothing", "Home", "Toys"}
-	fmt.Println("📦 Product Service: INICIADO")
+	fmt.Println(" Product Service: INICIADO")
 
 	for {
 		logData := ProductLog{

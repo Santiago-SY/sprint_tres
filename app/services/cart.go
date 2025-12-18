@@ -20,7 +20,7 @@ type CartLog struct {
 
 func RunCartService(sender *client.LogSender) {
 	actions := []string{"ADD_ITEM", "REMOVE_ITEM", "CLEAR_CART"}
-	fmt.Println("🛒 Cart Service: INICIADO")
+	fmt.Println(" Cart Service: INICIADO")
 
 	for {
 		logData := CartLog{

@@ -29,7 +29,7 @@ func RunGatewayService(sender *client.LogSender) {
 		"PostmanRuntime/7.32.0",
 	}
 
-	fmt.Println("🌐 API Gateway: INICIADO")
+	fmt.Println(" API Gateway: INICIADO")
 
 	for {
 		logData := GatewayLog{
