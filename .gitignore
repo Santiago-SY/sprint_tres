@@ -18,3 +18,4 @@ Thumbs.db
 # ¡CRÍTICO! Nunca subas la carpeta de datos de la base de datos a GitHub.
 # Los datos deben vivir solo en tu máquina o servidor.
 victorialogs-data/
+grafana/plugins/

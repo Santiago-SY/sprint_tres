@@ -1,6 +1,6 @@
 services:
   victoria-logs:
-    image: victoriametrics/victoria-logs:v0.4.1-victoria-logs
+    image: victoriametrics/victoria-logs:v1.39.0
     container_name: victoria-logs
     command: -retentionPeriod=7d -storageDataPath=/victoria-logs-data
     ports:
@@ -23,15 +23,20 @@ services:
       - logging-network
 
   grafana:
-    image: grafana/grafana:10.0.0
+    image: grafana/grafana:10.4.0
     container_name: grafana
     ports:
       - "3000:3000"
+    user: root # Importante para permisos de escritura del plugin
     volumes:
+      - ./grafana/plugins:/var/lib/grafana/plugins
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     environment:
-      - GF_INSTALL_PLUGINS=victoriametrics-datasource
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      # 👇 CAMBIO IMPORTANTE: Actualizamos el ID del plugin permitido
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=victoriametrics-logs-datasource
     depends_on:
       - victoria-logs
     networks:

@@ -1,7 +1,7 @@
 # --- ETAPA 1: EL CONSTRUCTOR (BUILDER) ---
 # Usamos una imagen que tiene todas las herramientas de Go (compilador, librerías)
 # Es pesada (aprox 800MB)
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Creamos una carpeta de trabajo adentro del contenedor
 WORKDIR /app
