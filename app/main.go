@@ -6,50 +6,45 @@ import (
 	"os/signal"
 	"syscall"
 
-	"sprint-tres/client"   // Tu motor
-	"sprint-tres/services" // Tus microservicios
+	"sprint-tres/client"
+	"sprint-tres/services"
 )
 
 func main() {
 	// --- PASO 1: CONFIGURACIÓN ---
-	// Leemos la URL desde las variables de entorno (definidas en docker-compose.yml)
-	// Si no existe, usamos localhost (útil para probar fuera de Docker).
 	victoriaURL := os.Getenv("VICTORIA_URL")
 	if victoriaURL == "" {
 		victoriaURL = "http://localhost:9428/insert/jsonline"
 	}
 
-	fmt.Printf("\n🚀 INICIANDO LOG GENERATOR\n")
+	fmt.Printf("\n🚀 INICIANDO LOG GENERATOR (7 Microservicios)\n")
 	fmt.Printf("🎯 Objetivo: %s\n", victoriaURL)
 
 	// --- PASO 2: ARRANCAR MOTOR ---
-	// Instanciamos el "Camión de Mudanza" y lo encendemos.
 	sender := client.NewLogSender(victoriaURL)
 	sender.Start()
 
-	// --- PASO 3: ARRANCAR SERVICIOS (CONCURRENCIA) ---
-	fmt.Println("🚦 Despertando Microservicios...")
+	// --- PASO 3: ARRANCAR SERVICIOS (CONCURRENCIA REAL) ---
+	fmt.Println("🚦 Despertando flota de servicios...")
 
-	// Lanzamos el servicio de Pagos en su propia Goroutine (hilo ligero).
-	// El 'go' al principio significa: "Ejecuta esto en paralelo y sigue bajando".
-	go services.RunPaymentService(sender)
+	// EXPLICACIÓN TÉCNICA (Para tu defensa):
+	// Usamos la keyword 'go' para lanzar cada función en una Goroutine separada.
+	// Si quitáramos el 'go', el programa se quedaría atrapado en el bucle infinito
+	// de RunGatewayService y nunca arrancaría los demás.
+	// Esto demuestra el modelo de concurrencia M:N de Go.
 
-	// (Aquí descomentaremos los otros servicios a medida que los creemos)
-	// go services.RunAuthService(sender)
-	// go services.RunGatewayService(sender)
-	// ...
+	go services.RunGatewayService(sender)      // Mucho tráfico
+	go services.RunAuthService(sender)         // IDs de usuarios
+	go services.RunPaymentService(sender)      // Dinero
+	go services.RunRiskService(sender)         // JSON Complejo (Schema-less)
+	go services.RunCartService(sender)         // Estado
+	go services.RunProductService(sender)      // Catálogo
+	go services.RunNotificationService(sender) // Emails
 
-	// --- PASO 4: ESPERA ACTIVA (GRACEFUL SHUTDOWN) ---
-	// Si el programa termina aquí, todo se apaga instantáneamente.
-	// Necesitamos bloquear la ejecución hasta que alguien quiera salir.
-
-	// Creamos un canal para escuchar señales del Sistema Operativo (Ctrl+C o Docker Stop)
+	// --- PASO 4: ESPERA ACTIVA ---
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
-	// El programa se queda "congelado" en esta línea esperando la señal.
 	<-c
 
 	fmt.Println("\n🛑 Señal de parada recibida. Apagando sistema...")
-	// Aquí el programa termina y Go limpia la memoria.
 }

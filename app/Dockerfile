@@ -10,7 +10,7 @@ WORKDIR /app
 COPY go.mod ./
 
 # 2. Descargamos las librerías de internet (Caché de Docker)
-# RUN go mod download  <-- (Lo descomentaremos luego cuando inicialicemos el módulo)
+RUN go mod download  
 
 # 3. Copiamos el resto del código fuente (los .go)
 COPY . .

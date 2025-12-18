@@ -1,0 +1,43 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": { "type": "victoriametrics-datasource", "uid": "VictoriaLogs" },
+      "fieldConfig": { "defaults": { "custom": {} }, "overrides": [] },
+      "gridPos": { "h": 20, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "victoriametrics-datasource", "uid": "VictoriaLogs" },
+          "expr": "*",
+          "refId": "A"
+        }
+      ],
+      "title": "Live Logs Stream (7 Microservices)",
+      "type": "logs"
+    }
+  ],
+  "refresh": "1s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["logs", "sprint-tres"],
+  "templating": { "list": [] },
+  "time": { "from": "now-5m", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "VictoriaLogs Overview",
+  "uid": "vlogs-overview",
+  "version": 1,
+  "weekStart": ""
+}
