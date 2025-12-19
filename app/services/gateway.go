@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 
@@ -13,14 +14,18 @@ type GatewayLog struct {
 	Timestamp string `json:"_time"`
 	Service   string `json:"service"`
 	Level     string `json:"level"`
-	Method    string `json:"method"`      // GET, POST
-	Path      string `json:"path"`        // /api/v1/products
-	Status    int    `json:"http_status"` // 200, 404, 500
-	LatencyMs int    `json:"latency_ms"`  // Tiempo de respuesta
-	UserAgent string `json:"user_agent"`  // Texto largo y repetitivo (Ideal para compresión)
+	Method    string `json:"method"`
+	Path      string `json:"path"`
+	Status    int    `json:"http_status"`
+	LatencyMs int    `json:"latency_ms"`
+	UserAgent string `json:"user_agent"`
 }
 
 func RunGatewayService(sender *client.LogSender) {
+	// TIER 1: Entrada Masiva (15 Hilos)
+	concurrency := 15
+	fmt.Printf("🌐 API GATEWAY: Iniciando simulacion de alto trafico (%d hilos)...\n", concurrency)
+
 	methods := []string{"GET", "POST", "PUT", "DELETE"}
 	paths := []string{"/api/products", "/api/auth/login", "/api/cart", "/api/checkout"}
 	userAgents := []string{
@@ -29,27 +34,40 @@ func RunGatewayService(sender *client.LogSender) {
 		"PostmanRuntime/7.32.0",
 	}
 
-	fmt.Println(" API Gateway: INICIADO")
+	for i := 0; i < concurrency; i++ {
+		go func(id int) {
+			for {
+				// --- ALGORITMO DE OLA (SINE WAVE) ---
+				cycleSeconds := 60.0
+				nowUnix := float64(time.Now().UnixNano()) / 1e9
+				wave := 1.0 + math.Sin(2*math.Pi*nowUnix/cycleSeconds)
 
-	for {
-		logData := GatewayLog{
-			Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
-			Service:   "api-gateway",
-			Level:     "INFO",
-			Method:    methods[rand.Intn(len(methods))],
-			Path:      paths[rand.Intn(len(paths))],
-			Status:    200,
-			LatencyMs: rand.Intn(500), // 0 a 500ms
-			UserAgent: userAgents[rand.Intn(len(userAgents))],
-		}
+				// Base muy rápida (20ms) para simular miles de requests
+				baseSleep := 20 * time.Millisecond
+				dynamicSleep := time.Duration(float64(baseSleep) / (0.1 + wave))
+				// ------------------------------------
 
-		if rand.Float32() < 0.05 { // 5% errores 500
-			logData.Status = 500
-			logData.Level = "ERROR"
-		}
+				logData := GatewayLog{
+					Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
+					Service:   "api-gateway",
+					Level:     "INFO",
+					Method:    methods[rand.Intn(len(methods))],
+					Path:      paths[rand.Intn(len(paths))],
+					Status:    200,
+					LatencyMs: rand.Intn(500),
+					UserAgent: userAgents[rand.Intn(len(userAgents))],
+				}
 
-		jsonData, _ := json.Marshal(logData)
-		sender.Enqueue(jsonData)
-		time.Sleep(5 * time.Millisecond) // Muy rápido (Alto tráfico)
+				if rand.Float32() < 0.02 { // 2% de error
+					logData.Status = 500
+					logData.Level = "ERROR"
+				}
+
+				jsonData, _ := json.Marshal(logData)
+				sender.Enqueue(jsonData)
+				time.Sleep(dynamicSleep)
+			}
+		}(i)
 	}
+	select {} // Bloqueo infinito
 }

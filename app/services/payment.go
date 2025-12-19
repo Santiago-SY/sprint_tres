@@ -3,65 +3,66 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 
-	"sprint-tres/client" // Importamos nuestro motor de envío
+	"sprint-tres/client"
 )
 
-// PaymentLog define la estructura de un evento de pago.
-// Los "json tags" (lo que está entre comillas `...`) definen cómo se verá en la base de datos.
 type PaymentLog struct {
-	Timestamp string  `json:"_time"`    // Campo especial: VictoriaLogs usa _time por defecto
-	Service   string  `json:"service"`  // Para filtrar por servicio: _stream:{service="payment"}
-	Level     string  `json:"level"`    // INFO, ERROR, WARN
-	Amount    float64 `json:"amount"`   // Monto (numérico para hacer sumas/promedios)
-	Currency  string  `json:"currency"` // USD, EUR, UYU
-	Gateway   string  `json:"gateway"`  // Stripe, PayPal
-	Status    string  `json:"status"`   // SUCCESS, FAILED
-	TraceID   string  `json:"trace_id"` // Para rastrear una petición única
+	Timestamp string  `json:"_time"`
+	Service   string  `json:"service"`
+	Level     string  `json:"level"`
+	Amount    float64 `json:"amount"`
+	Currency  string  `json:"currency"`
+	Gateway   string  `json:"gateway"`
+	Status    string  `json:"status"`
+	TraceID   string  `json:"trace_id"`
 }
 
-// RunPaymentService es el bucle infinito que simula la vida del microservicio.
 func RunPaymentService(sender *client.LogSender) {
-	// Datos semilla para aleatoriedad
+	// TIER 3: Conversion Real (2 Hilos) - Pocos pero importantes
+	concurrency := 2
+	fmt.Printf("💰 PAYMENT API: Procesando pagos (%d hilos)...\n", concurrency)
+
 	gateways := []string{"Stripe", "PayPal", "MercadoPago"}
 	currencies := []string{"USD", "EUR", "UYU"}
-	statuses := []string{"SUCCESS", "SUCCESS", "SUCCESS", "FAILED"} // 75% de probabilidad de éxito
+	statuses := []string{"SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "FAILED"}
 
-	fmt.Println(" Servicio de Pagos: INICIADO")
+	for i := 0; i < concurrency; i++ {
+		go func(id int) {
+			for {
+				// --- ALGORITMO DE OLA ---
+				cycleSeconds := 60.0
+				nowUnix := float64(time.Now().UnixNano()) / 1e9
+				wave := 1.0 + math.Sin(2*math.Pi*nowUnix/cycleSeconds)
 
-	for {
-		// 1. Simulación de Negocio: Crear el dato
-		now := time.Now().UTC()
-		logData := PaymentLog{
-			Timestamp: now.Format(time.RFC3339Nano), // Formato estándar ISO8601
-			Service:   "payment-api",
-			Level:     "INFO",
-			Amount:    float64(rand.Intn(50000)) / 100.0, // Genera monto entre 0.00 y 500.00
-			Currency:  currencies[rand.Intn(len(currencies))],
-			Gateway:   gateways[rand.Intn(len(gateways))],
-			Status:    statuses[rand.Intn(len(statuses))],
-			TraceID:   fmt.Sprintf("trace-%d", rand.Int63()), // ID único random
-		}
+				// Sleep Lento (200ms) para que haya menos pagos que visitas
+				baseSleep := 200 * time.Millisecond
+				dynamicSleep := time.Duration(float64(baseSleep) / (0.1 + wave))
+				// ------------------------
 
-		// Si falló el pago, cambiamos el nivel a ERROR (para que se vea rojo en Grafana)
-		if logData.Status == "FAILED" {
-			logData.Level = "ERROR"
-		}
+				logData := PaymentLog{
+					Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
+					Service:   "payment-api",
+					Level:     "INFO",
+					Amount:    float64(rand.Intn(10000)) / 100.0,
+					Currency:  currencies[rand.Intn(len(currencies))],
+					Gateway:   gateways[rand.Intn(len(gateways))],
+					Status:    statuses[rand.Intn(len(statuses))],
+					TraceID:   fmt.Sprintf("trace-%d-%d", id, rand.Int63()),
+				}
 
-		// 2. Serialización: Convertir Struct de Go -> JSON Bytes
-		// json.Marshal es rápido y seguro.
-		jsonData, _ := json.Marshal(logData)
+				if logData.Status == "FAILED" {
+					logData.Level = "ERROR"
+				}
 
-		// 3. Envío NO Bloqueante: ¡Aquí usamos el motor!
-		// Tiramos el JSON a la cinta transportadora y nos olvidamos.
-		sender.Enqueue(jsonData)
-
-		// 4. Ritmo de Tráfico
-		// Dormimos un poco para no saturar tu PC local.
-		// En un entorno real, esto dependería de los usuarios reales.
-		// 10ms = ~100 logs/segundo solo de este servicio.
-		time.Sleep(10 * time.Millisecond)
+				jsonData, _ := json.Marshal(logData)
+				sender.Enqueue(jsonData)
+				time.Sleep(dynamicSleep)
+			}
+		}(i)
 	}
+	select {}
 }
