@@ -23,7 +23,8 @@ type CartLog struct {
 	UserID    string `json:"user_id"`
 	Action    string `json:"action"`
 	Product   string `json:"product_sku"`
-	Latency   string `json:"latency_ms"`
+	Latency   int64  `json:"latency_us"` // AHORA: int64 y etiqueta _us
+	//Latency   string `json:"latency_ms"`
 }
 
 func RunCartService(sender *client.LogSender) {
@@ -73,7 +74,7 @@ func RunCartService(sender *client.LogSender) {
 				err := rdb.HSet(ctx, key, product, quantity).Err()
 				rdb.Expire(ctx, key, 24*time.Hour) // TTL de 1 día
 
-				duration := time.Since(start).Microseconds() // ¡Microsegundos!
+				duration := time.Since(start).Microseconds()
 
 				level := "INFO"
 				msg := fmt.Sprintf("Added %d x %s to cart", quantity, product)
@@ -91,7 +92,7 @@ func RunCartService(sender *client.LogSender) {
 					UserID:    userID,
 					Action:    "ADD",
 					Product:   product,
-					Latency:   fmt.Sprintf("%dµs", duration), // µs = ultra rápido
+					Latency:   duration,
 				}
 
 				jsonData, _ := json.Marshal(logData)

@@ -21,7 +21,9 @@ type ProductLog struct {
 	Name      string  `json:"product_name"`
 	Category  string  `json:"category"`
 	Price     float64 `json:"price"`
-	QueryTime string  `json:"query_time_ms"`
+	// Antes: QueryTime string `json:"query_time_ms"`
+	QueryTime int64 `json:"query_time_us"` // AHORA: int64 y etiqueta _us
+	//QueryTime string  `json:"query_time_ms"`
 }
 
 // Ahora recibe el Pool de Postgres
@@ -51,7 +53,7 @@ func RunProductService(sender *client.LogSender, db *pgxpool.Pool) {
 					"SELECT sku, name, category, price FROM products ORDER BY RANDOM() LIMIT 1").
 					Scan(&sku, &name, &category, &price)
 
-				duration := time.Since(start).Milliseconds()
+				duration := time.Since(start).Microseconds()
 
 				level := "INFO"
 				if err != nil {
@@ -69,7 +71,7 @@ func RunProductService(sender *client.LogSender, db *pgxpool.Pool) {
 					Name:      name,
 					Category:  category,
 					Price:     price,
-					QueryTime: fmt.Sprintf("%dms", duration),
+					QueryTime: duration,
 				}
 
 				jsonData, _ := json.Marshal(logData)
