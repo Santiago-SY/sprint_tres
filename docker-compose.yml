@@ -1,4 +1,5 @@
 services:
+  # --- SERVICIOS EXISTENTES (NO TOCAR) ---
   victoria-logs:
     image: victoriametrics/victoria-logs:v1.39.0
     container_name: victoria-logs
@@ -8,19 +9,7 @@ services:
     volumes:
       - vlogs-data:/victoria-logs-data
     networks:
-      - logging-network
-
-  log-generator:
-    build:
-      context: ./app
-      dockerfile: Dockerfile
-    container_name: log-generator
-    depends_on:
-      - victoria-logs
-    environment:
-      - VICTORIA_URL=http://victoria-logs:9428/insert/jsonline
-    networks:
-      - logging-network
+      - sprint-network
 
   grafana:
     image: grafana/grafana:10.4.0
@@ -29,9 +18,7 @@ services:
       - "3000:3000"
     user: root
     volumes:
-      # 👇 1. NUEVA LÍNEA: Persistencia de datos (Base de datos interna)
       - grafana-data:/var/lib/grafana
-      # 👇 Tus configuraciones existentes
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     environment:
@@ -42,13 +29,66 @@ services:
     depends_on:
       - victoria-logs
     networks:
-      - logging-network
+      - sprint-network
+
+  # --- NUEVA INFRAESTRUCTURA (SPRINT 4) ---
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: ecommerce_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      # Este script crea las tablas automáticamente al arrancar
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - sprint-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ecommerce_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:8.0
+    container_name: valkey-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - sprint-network
+
+  # --- TU GENERADOR (ACTUALIZADO) ---
+  log-generator:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: log-generator
+    depends_on:
+      victoria-logs:
+        condition: service_started
+      postgres:
+        condition: service_healthy # Esperamos a que Postgres esté listo
+    environment:
+      - VICTORIA_URL=http://victoria-logs:9428/insert/jsonline
+      # Variables para conectar Go con las DBs
+      - DB_HOST=postgres
+      - DB_USER=admin
+      - DB_PASS=secretpassword
+      - DB_NAME=ecommerce_db
+      - VALKEY_HOST=valkey:6379
+    networks:
+      - sprint-network
 
 volumes:
   vlogs-data:
-  # 👇 2. NUEVA LÍNEA: Declaramos el volumen
-  grafana-data: 
+  grafana-data:
+  pg-data: # Volumen para que no pierdas los datos de Postgres
 
 networks:
-  logging-network:
+  sprint-network:
     driver: bridge

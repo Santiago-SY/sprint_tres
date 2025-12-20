@@ -15,6 +15,9 @@ RUN go mod download
 # 3. Copiamos el resto del código fuente (los .go)
 COPY . .
 
+
+RUN go mod tidy
+
 # 4. Compilamos el binario
 # -o log-gen: El nombre del archivo final será 'log-gen'
 RUN go build -o log-gen main.go

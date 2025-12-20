@@ -11,40 +11,38 @@ import (
 )
 
 func main() {
-	// --- PASO 1: CONFIGURACIÓN ---
+	// 1. Logs (VictoriaLogs)
 	victoriaURL := os.Getenv("VICTORIA_URL")
 	if victoriaURL == "" {
 		victoriaURL = "http://localhost:9428/insert/jsonline"
 	}
-
-	fmt.Printf("\n INICIANDO LOG GENERATOR (7 Microservicios)\n")
-	fmt.Printf(" Objetivo: %s\n", victoriaURL)
-
-	// --- PASO 2: ARRANCAR MOTOR ---
 	sender := client.NewLogSender(victoriaURL)
-	sender.Start()
+	go sender.Start()
 
-	// --- PASO 3: ARRANCAR SERVICIOS (CONCURRENCIA REAL) ---
-	fmt.Println(" Despertando flota de servicios...")
+	// 2. Base de Datos (PostgreSQL)
+	fmt.Println("🔌 Conectando a persistencia...")
+	dbPool, err := client.InitDB()
+	if err != nil {
+		panic(err) // Si falla la DB, no podemos seguir
+	}
+	defer dbPool.Close()
 
-	// EXPLICACIÓN TÉCNICA (Para tu defensa):
-	// Usamos la keyword 'go' para lanzar cada función en una Goroutine separada.
-	// Si quitáramos el 'go', el programa se quedaría atrapado en el bucle infinito
-	// de RunGatewayService y nunca arrancaría los demás.
-	// Esto demuestra el modelo de concurrencia M:N de Go.
+	// 3. Iniciar Servicios
+	fmt.Println("🚀 Iniciando servicios...")
 
-	go services.RunGatewayService(sender)      // Mucho tráfico
-	go services.RunAuthService(sender)         // IDs de usuarios
-	go services.RunPaymentService(sender)      // Dinero
-	go services.RunRiskService(sender)         // JSON Complejo (Schema-less)
-	go services.RunCartService(sender)         // Estado
-	go services.RunProductService(sender)      // Catálogo
-	go services.RunNotificationService(sender) // Emails
+	go services.RunGatewayService(sender)
+	go services.RunAuthService(sender)
+	go services.RunPaymentService(sender)
+	go services.RunRiskService(sender)
+	go services.RunCartService(sender)
+	go services.RunNotificationService(sender)
 
-	// --- PASO 4: ESPERA ACTIVA ---
+	// AQUÍ EL CAMBIO: Le pasamos la DB al servicio de productos
+	go services.RunProductService(sender, dbPool)
+
+	// 4. Esperar señal de salida (Ctrl+C)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
-
-	fmt.Println("\n Señal de parada recibida. Apagando sistema...")
+	fmt.Println("🛑 Apagando...")
 }
