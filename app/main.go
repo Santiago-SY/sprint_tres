@@ -20,7 +20,7 @@ func main() {
 	go sender.Start()
 
 	// 2. Base de Datos (PostgreSQL)
-	fmt.Println("🔌 Conectando a persistencia...")
+	fmt.Println(" Conectando a persistencia...")
 	dbPool, err := client.InitDB()
 	if err != nil {
 		panic(err) // Si falla la DB, no podemos seguir
@@ -28,7 +28,7 @@ func main() {
 	defer dbPool.Close()
 
 	// 3. Iniciar Servicios
-	fmt.Println("🚀 Iniciando servicios...")
+	fmt.Println(" Iniciando servicios...")
 
 	go services.RunGatewayService(sender)
 	go services.RunAuthService(sender)
@@ -44,5 +44,5 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
-	fmt.Println("🛑 Apagando...")
+	fmt.Println(" Apagando...")
 }

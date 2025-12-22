@@ -24,7 +24,7 @@ type GatewayLog struct {
 func RunGatewayService(sender *client.LogSender) {
 	// TIER 1: Entrada Masiva (15 Hilos)
 	concurrency := 15
-	fmt.Printf("🌐 API GATEWAY: Iniciando simulacion de alto trafico (%d hilos)...\n", concurrency)
+	fmt.Printf("API GATEWAY: Iniciando simulacion de alto trafico (%d hilos)...\n", concurrency)
 
 	methods := []string{"GET", "POST", "PUT", "DELETE"}
 	paths := []string{"/api/products", "/api/auth/login", "/api/cart", "/api/checkout"}

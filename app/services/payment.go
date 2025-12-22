@@ -24,7 +24,7 @@ type PaymentLog struct {
 func RunPaymentService(sender *client.LogSender) {
 	// TIER 3: Conversion Real (2 Hilos) - Pocos pero importantes
 	concurrency := 2
-	fmt.Printf("💰 PAYMENT API: Procesando pagos (%d hilos)...\n", concurrency)
+	fmt.Printf("PAYMENT API: Procesando pagos (%d hilos)...\n", concurrency)
 
 	gateways := []string{"Stripe", "PayPal", "MercadoPago"}
 	currencies := []string{"USD", "EUR", "UYU"}

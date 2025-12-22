@@ -22,7 +22,7 @@ type AuthLog struct {
 func RunAuthService(sender *client.LogSender) {
 	// TIER 2: Intencion (6 Hilos)
 	concurrency := 6
-	fmt.Printf("🔐 AUTH SERVICE: Simulando logins (%d hilos)...\n", concurrency)
+	fmt.Printf("AUTH SERVICE: Simulando logins (%d hilos)...\n", concurrency)
 
 	actions := []string{"LOGIN", "LOGIN", "LOGOUT", "REFRESH_TOKEN"}
 

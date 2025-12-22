@@ -34,7 +34,7 @@ func RunCartService(sender *client.LogSender) {
 		valkeyHost = "valkey:6379"
 	}
 
-	fmt.Printf("🛒 CART: Conectando a %s...\n", valkeyHost)
+	fmt.Printf("CART: Conectando a %s...\n", valkeyHost)
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr: valkeyHost,
@@ -44,9 +44,9 @@ func RunCartService(sender *client.LogSender) {
 	// Ping de prueba
 	ctx := context.Background()
 	if _, err := rdb.Ping(ctx).Result(); err != nil {
-		fmt.Printf("❌ CART ERROR: No veo a Valkey: %v\n", err)
+		fmt.Printf("CART ERROR: No veo a Valkey: %v\n", err)
 	} else {
-		fmt.Println("🛒 CART: ¡Conectado a Valkey con éxito! 🚀")
+		fmt.Println("CART: ¡Conectado a Valkey con éxito! ")
 	}
 
 	concurrency := 10

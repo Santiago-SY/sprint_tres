@@ -22,7 +22,7 @@ type NotificationLog struct {
 func RunNotificationService(sender *client.LogSender) {
 	// TIER 3: Acompaña a pagos (2 Hilos)
 	concurrency := 2
-	fmt.Printf("🔔 NOTIFICATION SVC: Enviando alertas (%d hilos)...\n", concurrency)
+	fmt.Printf("NOTIFICATION SVC: Enviando alertas (%d hilos)...\n", concurrency)
 
 	channels := []string{"EMAIL", "EMAIL", "SMS"}
 	types := []string{"ORDER_CONFIRMED", "PAYMENT_RECEIVED", "OTP"}

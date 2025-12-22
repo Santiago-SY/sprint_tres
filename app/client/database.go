@@ -35,11 +35,11 @@ func InitDB() (*pgxpool.Pool, error) {
 		pool, err = pgxpool.NewWithConfig(context.Background(), config)
 		if err == nil {
 			if errPing := pool.Ping(context.Background()); errPing == nil {
-				fmt.Println("🐘 Conexión a PostgreSQL EXITOSA")
+				fmt.Println("Conexión a PostgreSQL EXITOSA")
 				return pool, nil
 			}
 		}
-		fmt.Printf("⏳ Esperando a Postgres... (%d/10)\n", i+1)
+		fmt.Printf("Esperando a Postgres... (%d/10)\n", i+1)
 		time.Sleep(2 * time.Second)
 	}
 

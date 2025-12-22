@@ -22,7 +22,7 @@ type RiskLog struct {
 func RunRiskService(sender *client.LogSender) {
 	// TIER 3: Acompaña a pagos (2 Hilos)
 	concurrency := 2
-	fmt.Printf("🛡️ RISK ENGINE: Analizando fraude (%d hilos)...\n", concurrency)
+	fmt.Printf("RISK ENGINE: Analizando fraude (%d hilos)...\n", concurrency)
 
 	for i := 0; i < concurrency; i++ {
 		go func(id int) {

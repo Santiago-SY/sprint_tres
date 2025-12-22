@@ -29,7 +29,7 @@ type ProductLog struct {
 // Ahora recibe el Pool de Postgres
 func RunProductService(sender *client.LogSender, db *pgxpool.Pool) {
 	concurrency := 20
-	fmt.Printf("📦 PRODUCT SERVICE: SQL Real Activo (%d hilos)\n", concurrency)
+	fmt.Printf("PRODUCT SERVICE: SQL Real Activo (%d hilos)\n", concurrency)
 
 	for i := 0; i < concurrency; i++ {
 		go func(id int) {
@@ -59,7 +59,7 @@ func RunProductService(sender *client.LogSender, db *pgxpool.Pool) {
 				if err != nil {
 					level = "ERROR"
 					sku = "DB_ERR"
-					fmt.Printf("❌ Error DB: %v\n", err)
+					fmt.Printf("Error DB: %v\n", err)
 				}
 
 				logData := ProductLog{
